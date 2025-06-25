@@ -110,6 +110,92 @@ docker inspect --format='{{json .State.Health}}' <container_name>
 
 ---
 
+
+🐞 Common Errors Faced and Solutions
+
+❌ 1. uv: command not found during Docker build
+Cause:
+You tried to run uv in the container before it was installed.
+
+Fix:
+Installed uv manually using this block in the Dockerfile:
+
+RUN curl -LO https://github.com/astral-sh/uv/releases/latest/download/uv-x86_64-unknown-linux-musl.tar.gz && \
+    tar -xzf uv-x86_64-unknown-linux-musl.tar.gz && \
+    mv uv /usr/local/bin/uv && chmod +x /usr/local/bin/uv
+
+    
+❌ 2. Failed to fetch deb.debian.org or apt-get update fails
+Cause:
+The Docker container couldn’t connect to the internet due to DNS issues.
+
+Fix:
+Configured Docker daemon DNS by editing /etc/docker/daemon.json:
+
+{
+  "dns": ["8.8.8.8", "1.1.1.1"]
+}
+Then restarted Docker:
+sudo systemctl restart docker
+
+
+❌ 3. uv lock error: No interpreter found for Python 3.13
+Cause:
+The Python version specified in pyproject.toml (>=3.13) wasn't installed on your system.
+
+Fix:
+Updated the requires-python in pyproject.toml to match the installed version:
+requires-python = ">=3.11"
+Then re-ran:
+uv lock
+
+
+❌ 4. service1 container showing (unhealthy) in Docker
+Cause:
+Healthcheck failed because curl was not installed in the Go container.
+
+Fix:
+Added curl installation to service_1/Dockerfile:
+RUN apk add --no-cache curl
+Also ensured the Go app had a valid /ping route that returned proper JSON.
+
+
+❌ 5. docker-compose: command not found
+Cause:
+docker-compose v1 is deprecated or not installed.
+
+Fix:
+Used the correct modern CLI:
+docker compose up --build
+(Note the space between docker and compose)
+
+
+❌ 6. nginx: host not found in upstream "service1" error
+Cause:
+Nginx started before service1 was ready, or service name was incorrect.
+
+Fix:
+Used depends_on in docker-compose.yml:
+nginx:
+  depends_on:
+    - service1
+    - service2
+Also ensured the proxy_pass in nginx.conf used the Docker service names correctly:
+proxy_pass http://service1:8001/;
+
+❌ 7. .venv/bin/uv: not found during build
+Cause:
+You tried to use uv inside .venv before installing it.
+
+Fix:
+Installed uv manually inside the virtual environment:
+
+RUN .venv/bin/python -m ensurepip && \
+    .venv/bin/python -m pip install --upgrade pip && \
+    .venv/bin/python -m pip install uv
+
+---
+
 ## 🙌 Acknowledgements
 
 Built as part of a DevOps Internship assignment for **DPDzero**.
