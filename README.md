@@ -87,7 +87,81 @@ docker inspect --format='{{json .State.Health}}' <container_name>
 [service2] Running on http://0.0.0.0:8002
 [nginx] Reverse proxy up on port 80
 ```
+⚙️ About uv
 
+uv is a fast, modern Python package manager and virtual environment tool written in Rust. It aims to be a drop-in replacement for pip, pip-tools, and virtualenv with significantly better performance and unified workflows.
+
+🔥 Why uv?
+
+✅ Extremely fast dependency resolution and installation
+
+✅ Single tool to manage:
+
+Virtual environments (uv venv)
+
+Lockfiles (uv lock)
+
+Dependency syncing (uv sync)
+
+Script execution (uv run)
+
+✅ Supports modern pyproject.toml-based workflows
+
+✅ Ideal for Docker-based Python projects due to speed and reproducibility
+
+🐳 Using uv in Docker
+
+In this project, uv is used inside the Python (Service 2) Docker container to:
+
+Create a virtual environment:
+
+RUN uv venv
+
+Upgrade pip and install uv inside the venv:
+
+RUN .venv/bin/python -m ensurepip && \
+    .venv/bin/python -m pip install --upgrade pip && \
+    .venv/bin/python -m pip install uv
+
+Install all dependencies from uv.lock:
+
+RUN .venv/bin/uv sync
+
+Run the application using uv:
+
+CMD ["uv", "run", "app.py"]
+
+📦 Locking Dependencies
+
+To lock your dependencies with uv:
+
+uv lock
+
+This reads from your pyproject.toml and generates a uv.lock file.
+
+The uv.lock file ensures everyone — including Docker builds — installs the exact same dependency versions for reproducibility.
+
+🧱 Summary of Benefits
+
+Feature
+
+Benefit
+
+🔥 Speed
+
+Much faster than pip + virtualenv
+
+🧹 Simplicity
+
+All-in-one dependency management
+
+🐳 Docker-Friendly
+
+Clean install, perfect for CI/CD
+
+🎯 Reliable Builds
+
+Lockfile ensures exact dependencies
 ---
 
 ## 📦 Environment Details
