@@ -27,7 +27,18 @@ docker-nginx-reverse-proxy/
 │
 ├── docker-compose.yml           # Defines multi-service Docker environment
 └── README.md
+
 ```
+
+To run this project locally, ensure your host system has the following installed:
+
+✅ Docker Engine (v20.10+ recommended)
+
+✅ Docker Compose Plugin
+
+✅ Git (to clone the repository)
+
+✅ Internet access (required to download base images and dependencies)
 
 ---
 
